@@ -34,8 +34,8 @@ class PhaseLockNode:
         # Initialize waveform parameters before creating UI elements
         self.waveform_thread = None
         self.waveform_running = False
-        self.waveform_freq = 10.0 #Adjust for output voltage frequency
-        self.phase_delay_percent = 0.33  # Adjust for percent delay of waveform .15=15%
+        self.waveform_freq = 10.0  # Adjust for output voltage frequency
+        self.phase_offset_degrees = 0.0  # Phase offset in degrees (0-360)
         self.update_rate = 1000  # Hz update rate for voltage waveform
 
         rospy.Subscriber('/optic_flow_mean_vx', Float32, self.callback)
@@ -71,15 +71,15 @@ class PhaseLockNode:
         self.ax_mag_hist.grid(True, alpha=0.3)
         self.ax_mag_hist.legend()
 
-        # Create slider for phase delay adjustment
+        # Create slider for phase offset adjustment
         ax_slider = self.fig.add_subplot(gs[3])
         self.phase_slider = Slider(
-            ax_slider, 'Phase Delay %', 
-            0.0, 100.0, 
-            valinit=self.phase_delay_percent * 100,
-            valfmt='%.1f%%'
+            ax_slider, 'Phase Offset (deg)', 
+            0.0, 360.0, 
+            valinit=self.phase_offset_degrees,
+            valfmt='%.1f°'
         )
-        self.phase_slider.on_changed(self.update_phase_delay)
+        self.phase_slider.on_changed(self.update_phase_offset)
 
         plt.tight_layout()
 
@@ -109,10 +109,10 @@ class PhaseLockNode:
         # Track start time for relative time plotting
         self.start_time = rospy.get_time()
 
-    def update_phase_delay(self, val):
-        """Callback for phase delay slider"""
-        self.phase_delay_percent = val / 100.0
-        print(f"[INFO] Phase delay updated to {val:.1f}% ({self.phase_delay_percent:.3f})")
+    def update_phase_offset(self, val):
+        """Callback for phase offset slider"""
+        self.phase_offset_degrees = val
+        print(f"[INFO] Phase offset updated to {val:.1f}° ({val * np.pi / 180.0:.3f} rad)")
 
     def callback(self, msg):
         self.buffer.append(msg.data)
@@ -155,24 +155,28 @@ class PhaseLockNode:
             start_time = time.time()
             while self.waveform_running:
                 t = time.time() - start_time
-                phase_delay = self.phase_delay_percent * (1.0 / self.waveform_freq)  # seconds
-                t_delayed = t + phase_delay
-
-                voltage = 1.5 + 1.5 * math.sin(2 * math.pi * self.waveform_freq * t_delayed)
-                voltage = max(0.0, min(3.0, voltage))
-
+                
+                # Convert phase offset from degrees to radians
+                phase_offset_rad = self.phase_offset_degrees * math.pi / 180.0
+                
+                # Apply phase offset to both outputs
+                voltage_0 = 2.1 + 2.1 * math.sin(2 * math.pi * self.waveform_freq * t + phase_offset_rad)
+                voltage_0 = max(0.0, min(4.2, voltage_0))
+                voltage_1 = 2.1 + 2.1 * math.sin(2 * math.pi * self.waveform_freq * t + phase_offset_rad + math.pi)
+                voltage_1 = max(0.0, min(4.2, voltage_1))
+                
                 try:
                     if self.voltage_output_0:
-                        self.voltage_output_0.setVoltage(voltage)
+                        self.voltage_output_0.setVoltage(voltage_0)
                     if self.voltage_output_1:
-                        self.voltage_output_1.setVoltage(voltage)
-
-                    print(f"[Waveform Output] t={t_delayed:.3f}s | Voltage Sent = {voltage:.3f} V")
+                        self.voltage_output_1.setVoltage(voltage_1)
+                    
+                    print(f"[Waveform Output] t={t:.3f}s | V0={voltage_0:.3f}V, V1={voltage_1:.3f}V")
                 except Exception as e:
                     print(f"[Waveform Output Error] {e}")
-
+                
                 time.sleep(0.01)
-
+        
         self.waveform_thread = threading.Thread(target=run_waveform)
         self.waveform_thread.daemon = True
         self.waveform_thread.start()
