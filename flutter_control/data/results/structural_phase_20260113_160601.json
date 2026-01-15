@@ -1,0 +1,83 @@
+[
+  {
+    "frequency": 5.0,
+    "avg_phase_lag": 125.10002476223667,
+    "std_phase_lag": 26.137168610207972,
+    "measurements": [
+      {
+        "excitation_phase": 0,
+        "response_phase": 86.80730156385273,
+        "phase_lag": 86.80730156385273
+      },
+      {
+        "excitation_phase": 90,
+        "response_phase": 238.27626108305716,
+        "phase_lag": 148.27626108305716
+      },
+      {
+        "excitation_phase": 180,
+        "response_phase": 295.1242774383965,
+        "phase_lag": 115.12427743839652
+      },
+      {
+        "excitation_phase": 270,
+        "response_phase": 60.19225896364028,
+        "phase_lag": 150.19225896364028
+      }
+    ]
+  },
+  {
+    "frequency": 6.0,
+    "avg_phase_lag": 89.15633141808088,
+    "std_phase_lag": 5.451793997535143,
+    "measurements": [
+      {
+        "excitation_phase": 0,
+        "response_phase": 85.09372665343592,
+        "phase_lag": 85.09372665343592
+      },
+      {
+        "excitation_phase": 90,
+        "response_phase": 180.2091495692037,
+        "phase_lag": 90.2091495692037
+      },
+      {
+        "excitation_phase": 180,
+        "response_phase": 263.70616757541023,
+        "phase_lag": 83.70616757541023
+      },
+      {
+        "excitation_phase": 270,
+        "response_phase": 7.616281874273681,
+        "phase_lag": 97.61628187427368
+      }
+    ]
+  },
+  {
+    "frequency": 7.0,
+    "avg_phase_lag": 91.96812773631186,
+    "std_phase_lag": 61.576247676810155,
+    "measurements": [
+      {
+        "excitation_phase": 0,
+        "response_phase": 89.76370174529623,
+        "phase_lag": 89.76370174529623
+      },
+      {
+        "excitation_phase": 90,
+        "response_phase": 270.1854053523184,
+        "phase_lag": 180.1854053523184
+      },
+      {
+        "excitation_phase": 180,
+        "response_phase": 271.85857958153576,
+        "phase_lag": 91.85857958153576
+      },
+      {
+        "excitation_phase": 270,
+        "response_phase": 276.06482426609705,
+        "phase_lag": 6.064824266097048
+      }
+    ]
+  }
+]

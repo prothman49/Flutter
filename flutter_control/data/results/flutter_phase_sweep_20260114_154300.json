@@ -1,0 +1,92 @@
+[
+  {
+    "phase": 30.0,
+    "avg_magnitude": 149.2001134230483,
+    "peak_magnitude": 234.8021973153302,
+    "min_magnitude": 57.233988919619165,
+    "std_magnitude": 37.71115009417861,
+    "flutter_time_s": 33.99999999999994,
+    "flutter_percent": 37.777777777777715,
+    "test_duration": 90
+  },
+  {
+    "phase": 45.0,
+    "avg_magnitude": 148.18671779610384,
+    "peak_magnitude": 225.47096576696612,
+    "min_magnitude": 75.78698471231715,
+    "std_magnitude": 35.35990163981694,
+    "flutter_time_s": 32.59999999999992,
+    "flutter_percent": 36.222222222222136,
+    "test_duration": 90
+  },
+  {
+    "phase": 60.0,
+    "avg_magnitude": 149.75825187136738,
+    "peak_magnitude": 221.55938982089327,
+    "min_magnitude": 52.95402001908779,
+    "std_magnitude": 34.900301383988726,
+    "flutter_time_s": 34.99999999999996,
+    "flutter_percent": 38.88888888888884,
+    "test_duration": 90
+  },
+  {
+    "phase": 75.0,
+    "avg_magnitude": 154.19644958705243,
+    "peak_magnitude": 209.6766168345869,
+    "min_magnitude": 80.96007166798242,
+    "std_magnitude": 29.963404304508234,
+    "flutter_time_s": 38.60000000000001,
+    "flutter_percent": 42.8888888888889,
+    "test_duration": 90
+  },
+  {
+    "phase": 90.0,
+    "avg_magnitude": 146.2939281881993,
+    "peak_magnitude": 208.05348776786,
+    "min_magnitude": 52.98806476244489,
+    "std_magnitude": 33.58250099419869,
+    "flutter_time_s": 34.199999999999946,
+    "flutter_percent": 37.999999999999936,
+    "test_duration": 90
+  },
+  {
+    "phase": 105.0,
+    "avg_magnitude": 148.68768944763258,
+    "peak_magnitude": 222.55325206931295,
+    "min_magnitude": 68.29530165450345,
+    "std_magnitude": 31.280667579449766,
+    "flutter_time_s": 36.199999999999974,
+    "flutter_percent": 40.22222222222219,
+    "test_duration": 90
+  },
+  {
+    "phase": 120.0,
+    "avg_magnitude": 156.59056028031577,
+    "peak_magnitude": 220.875867501779,
+    "min_magnitude": 85.60607160939394,
+    "std_magnitude": 31.71441539605882,
+    "flutter_time_s": 38.80000000000001,
+    "flutter_percent": 43.11111111111112,
+    "test_duration": 90
+  },
+  {
+    "phase": 135.0,
+    "avg_magnitude": 144.5932226500816,
+    "peak_magnitude": 229.42098537438076,
+    "min_magnitude": 39.03760699501915,
+    "std_magnitude": 31.70006831041145,
+    "flutter_time_s": 34.199999999999946,
+    "flutter_percent": 37.999999999999936,
+    "test_duration": 90
+  },
+  {
+    "phase": 150.0,
+    "avg_magnitude": 152.26296549435807,
+    "peak_magnitude": 216.5858840241719,
+    "min_magnitude": 86.47855405627018,
+    "std_magnitude": 29.45173423648375,
+    "flutter_time_s": 37.8,
+    "flutter_percent": 42.0,
+    "test_duration": 90
+  }
+]

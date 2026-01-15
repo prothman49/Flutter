@@ -1,0 +1,55 @@
+{
+  "optimal_phase": 225.0,
+  "control_off": {
+    "avg_magnitude": 136.24585195065984,
+    "flutter_percent": 31.222222222222214,
+    "cycles": [
+      {
+        "avg_magnitude": 130.80166572370408,
+        "peak_magnitude": 189.67318814275748,
+        "flutter_time": 34.39999999999995,
+        "flutter_percent": 28.666666666666625
+      },
+      {
+        "avg_magnitude": 133.7400030670181,
+        "peak_magnitude": 206.40154203194356,
+        "flutter_time": 34.59999999999995,
+        "flutter_percent": 28.833333333333293
+      },
+      {
+        "avg_magnitude": 144.19588706125734,
+        "peak_magnitude": 218.87675756457594,
+        "flutter_time": 43.40000000000008,
+        "flutter_percent": 36.16666666666673
+      }
+    ]
+  },
+  "control_on": {
+    "avg_magnitude": 121.14912286613786,
+    "flutter_percent": 17.99999999999996,
+    "cycles": [
+      {
+        "avg_magnitude": 123.10208186609987,
+        "peak_magnitude": 205.88784033849186,
+        "flutter_time": 23.999999999999947,
+        "flutter_percent": 19.999999999999957
+      },
+      {
+        "avg_magnitude": 119.92806528308864,
+        "peak_magnitude": 176.2459748142196,
+        "flutter_time": 19.399999999999963,
+        "flutter_percent": 16.166666666666636
+      },
+      {
+        "avg_magnitude": 120.41722144922505,
+        "peak_magnitude": 186.67843069014089,
+        "flutter_time": 21.399999999999956,
+        "flutter_percent": 17.833333333333297
+      }
+    ]
+  },
+  "effectiveness": {
+    "magnitude_reduction_percent": 11.080505474756855,
+    "flutter_time_reduction_percent": 42.34875444839869
+  }
+}

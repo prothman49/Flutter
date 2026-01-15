@@ -1,0 +1,56 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Start Flutter System (Camera + Optic Flow)",
+            "type": "shell",
+            "command": "roslaunch",
+            "args": ["flutter_control", "camera_only.launch"],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Run Live Control",
+            "type": "shell",
+            "command": "python3",
+            "args": ["${workspaceFolder}/scripts/run_live_control.py"],
+            "presentation": {
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Test: Structural Phase",
+            "type": "shell",
+            "command": "python3",
+            "args": ["${workspaceFolder}/scripts/test_structural_phase.py"],
+            "presentation": {
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Test: Flutter Phase Sweep",
+            "type": "shell",
+            "command": "python3",
+            "args": ["${workspaceFolder}/scripts/test_flutter_phase_sweep.py"],
+            "presentation": {
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Kill All ROS Nodes",
+            "type": "shell",
+            "command": "rosnode kill -a",
+            "presentation": {
+                "panel": "new"
+            }
+        }
+    ]
+}
