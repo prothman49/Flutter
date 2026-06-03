@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "condition": "OPEN_LOOP_54",
+    "sample": 3,
+    "bag_name": "OPEN_LOOP_54_sample03_20260515_140949",
+    "phase_offset_deg": 225.0,
+    "flutter_threshold": 105,
+    "timestamp": "20260515_141152",
+    "t_uncontrolled_s": 60,
+    "t_controlled_s": 60
+  },
+  "uncontrolled": {
+    "n_samples": 168,
+    "mean_magnitude": 166.1787695022982,
+    "std_magnitude": 31.497830779512068,
+    "peak_magnitude": 228.3428022132508,
+    "min_magnitude": 98.86583260546259,
+    "flutter_fraction": 0.9880952380952381,
+    "flutter_time_s": 59.28571428571429,
+    "control_active_frac": 0.0
+  },
+  "controlled": {
+    "n_samples": 158,
+    "mean_magnitude": 125.690361699518,
+    "std_magnitude": 23.557154107384097,
+    "peak_magnitude": 212.84383722195898,
+    "min_magnitude": 80.95266325150607,
+    "flutter_fraction": 0.7848101265822784,
+    "flutter_time_s": 47.088607594936704,
+    "control_active_frac": 0.7848101265822784
+  },
+  "reduction": {
+    "magnitude_reduction_pct": 24.364368519541998,
+    "flutter_reduction_pct": 20.57343297239592
+  }
+}

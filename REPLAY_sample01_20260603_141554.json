@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "condition": "REPLAY",
+    "sample": 1,
+    "bag_name": "REPLAY_sample01_20260603_141351",
+    "phase_offset_deg": 225.0,
+    "flutter_threshold": 42,
+    "timestamp": "20260603_141554",
+    "t_uncontrolled_s": 60,
+    "t_controlled_s": 60
+  },
+  "uncontrolled": {
+    "n_samples": 159,
+    "mean_magnitude": 189.94682964614967,
+    "std_magnitude": 41.27503549969736,
+    "peak_magnitude": 286.96204597546864,
+    "min_magnitude": 103.24857556830236,
+    "flutter_fraction": 1.0,
+    "flutter_time_s": 60.0,
+    "control_active_frac": 0.0
+  },
+  "controlled": {
+    "n_samples": 152,
+    "mean_magnitude": 147.58463685383168,
+    "std_magnitude": 34.21927438157819,
+    "peak_magnitude": 242.2639319526546,
+    "min_magnitude": 77.23604185354466,
+    "flutter_fraction": 1.0,
+    "flutter_time_s": 60.0,
+    "control_active_frac": 1.0
+  },
+  "reduction": {
+    "magnitude_reduction_pct": 22.302132060447732,
+    "flutter_reduction_pct": 0.0
+  }
+}

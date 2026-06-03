@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "condition": "POISSON",
+    "sample": 6,
+    "bag_name": "POISSON_sample06_20260515_144627",
+    "phase_offset_deg": 225.0,
+    "flutter_threshold": 105,
+    "timestamp": "20260515_144829",
+    "t_uncontrolled_s": 60,
+    "t_controlled_s": 60
+  },
+  "uncontrolled": {
+    "n_samples": 163,
+    "mean_magnitude": 173.18212383911882,
+    "std_magnitude": 38.895450272287704,
+    "peak_magnitude": 241.4528954279688,
+    "min_magnitude": 78.84287500657184,
+    "flutter_fraction": 0.9386503067484663,
+    "flutter_time_s": 56.31901840490798,
+    "control_active_frac": 0.0
+  },
+  "controlled": {
+    "n_samples": 149,
+    "mean_magnitude": 129.40187503642036,
+    "std_magnitude": 24.595464867490566,
+    "peak_magnitude": 193.4132595566991,
+    "min_magnitude": 82.62308142291806,
+    "flutter_fraction": 0.8322147651006712,
+    "flutter_time_s": 49.93288590604027,
+    "control_active_frac": 0.8322147651006712
+  },
+  "reduction": {
+    "magnitude_reduction_pct": 25.27988907409926,
+    "flutter_reduction_pct": 11.33921129973242
+  }
+}
