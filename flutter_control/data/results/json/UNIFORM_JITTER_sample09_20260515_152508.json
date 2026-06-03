@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "condition": "UNIFORM_JITTER",
+    "sample": 9,
+    "bag_name": "UNIFORM_JITTER_sample09_20260515_152305",
+    "phase_offset_deg": 225.0,
+    "flutter_threshold": 105,
+    "timestamp": "20260515_152508",
+    "t_uncontrolled_s": 60,
+    "t_controlled_s": 60
+  },
+  "uncontrolled": {
+    "n_samples": 162,
+    "mean_magnitude": 179.39385725858997,
+    "std_magnitude": 30.116937177029392,
+    "peak_magnitude": 237.44779410588623,
+    "min_magnitude": 119.14182631576703,
+    "flutter_fraction": 1.0,
+    "flutter_time_s": 60.0,
+    "control_active_frac": 0.0
+  },
+  "controlled": {
+    "n_samples": 151,
+    "mean_magnitude": 122.11938762875208,
+    "std_magnitude": 20.778576854844243,
+    "peak_magnitude": 185.52368332828135,
+    "min_magnitude": 79.99024442646876,
+    "flutter_fraction": 0.7947019867549668,
+    "flutter_time_s": 47.68211920529801,
+    "control_active_frac": 0.7947019867549668
+  },
+  "reduction": {
+    "magnitude_reduction_pct": 31.92666153963051,
+    "flutter_reduction_pct": 20.529801324503318
+  }
+}
