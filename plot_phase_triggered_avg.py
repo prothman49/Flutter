@@ -60,7 +60,7 @@ PULSE_PERIOD   = 1.0 / FLUTTER_FREQ   # ~0.185s
 T_UNCONTROLLED = 60.0
 T_CONTROLLED   = 60.0
 
-CONDITIONS = ['CLOSED_LOOP', 'OPEN_LOOP_54', 'POISSON', 'UNIFORM_JITTER', 'PHASE_RANDOMIZED']
+CONDITIONS = ['CLOSED_LOOP', 'OPEN_LOOP_54', 'POISSON', 'UNIFORM_JITTER', 'PHASE_RANDOMIZED', 'REPLAY']
 
 CONDITION_LABELS = {
     'CLOSED_LOOP':       'Closed Loop',
@@ -68,6 +68,7 @@ CONDITION_LABELS = {
     'POISSON':           'Poisson',
     'UNIFORM_JITTER':    'Uniform Jitter',
     'PHASE_RANDOMIZED':  'Polarity Randomized',
+    'REPLAY':            'Replay',
 }
 
 CONDITION_COLORS = {
@@ -76,6 +77,7 @@ CONDITION_COLORS = {
     'POISSON':           '#FF9800',
     'UNIFORM_JITTER':    '#9C27B0',
     'PHASE_RANDOMIZED':  '#F44336',
+    'REPLAY':            '#795548',
 }
 
 TOPICS = [
@@ -340,11 +342,9 @@ def plot_condition(condition, results, output_dir, window_s):
     label = CONDITION_LABELS[condition]
 
     row_topics = [
-        ('/optic_flow_mean_vx', 'Optic flow',        '#2c7bb6'),
-        ('/amplitude_envelope', 'Amplitude envelope', '#1a9641'),
-        ('/phase_mod',          'Phase (rad)',         '#d4a017'),
-        ('piezo_ch0',           'Piezo ch0 (V)',       color),
-        ('piezo_ch1',           'Piezo ch1 (V)',       color),
+        ('/optic_flow_mean_vx', 'Optic flow',  '#2c7bb6'),
+        ('/phase_mod',          'Phase (rad)', '#d4a017'),
+        ('piezo_ch0',           'Piezo ch0 (V)', color),
     ]
 
     n_rows = len(row_topics)
@@ -428,10 +428,8 @@ def plot_comparison(all_results, output_dir, window_s, segment='controlled'):
     """
     row_topics = [
         ('/optic_flow_mean_vx', 'Optic flow'),
-        ('/amplitude_envelope', 'Amplitude envelope'),
         ('/phase_mod',          'Phase (rad)'),
         ('piezo_ch0',           'Piezo ch0 (V)'),
-        ('piezo_ch1',           'Piezo ch1 (V)'),
     ]
 
     n_rows = len(row_topics)
