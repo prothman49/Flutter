@@ -126,9 +126,34 @@ def draw_ci_box(ax, x_center, values, color, box_width=0.35):
 
     return mean, ci_lo, ci_hi
 
+def load_new_session_jsons(json_dir, condition):
+    """
+    Load magnitude_reduction_pct from new-style per-sample JSONs
+    produced by run_full_protocol.py.
+    """
+    json_dir = Path(json_dir)
+    reductions = []
+    for jf in sorted(json_dir.glob(f'{condition}_sample*.json')):
+        try:
+            with open(jf) as f:
+                d = json.load(f)
+            pct = d.get('reduction', {}).get('magnitude_reduction_pct', None)
+            if pct is not None:
+                reductions.append(pct)
+                print(f"  {jf.name}: {pct:.1f}%")
+        except Exception as e:
+            print(f"  [ERROR] {jf.name}: {e}")
+    return np.array(reductions)
+
+
 def main():
     base_path = Path.home() / 'Desktop' / 'Flutter_analysis' / 'figures_for_dissertation' / 'off_frequency_tests'
-    print(f"Looking for data in: {base_path}\n")
+
+    # New session JSON directory — OL_RDM folder on Mac
+    new_json_dir = base_path / 'OL_RDM'
+
+    print(f"Looking for off-frequency data in: {base_path}")
+    print(f"Looking for new session data in:   {new_json_dir}\n")
 
     test_configs = [
         {'folder': '0hz',  'freq': 0.0,  'label': '0 Hz\nPiezo 1 ON at 2140V DC'},
@@ -140,9 +165,9 @@ def main():
     all_data = {}
     print("Loading data files...\n")
 
-    # ── Closed-loop reference: n=30 per-trial ────────────────────────────────
-    print("Frequency-Matched Control (n=30):")
-    cl_reductions = load_closed_loop_n30(base_path)
+    # ── Closed-loop — new session JSONs ──────────────────────────────────────
+    print("Closed Loop (new session):")
+    cl_reductions = load_new_session_jsons(new_json_dir, 'CLOSED_LOOP')
     if len(cl_reductions) > 0:
         all_data[5.4] = {
             'reductions': cl_reductions,
@@ -152,32 +177,25 @@ def main():
             'n':    len(cl_reductions),
             'label': '5.4 Hz',
         }
+        print(f"  → {len(cl_reductions)} trials, mean = {np.mean(cl_reductions):.1f}%\n")
+    else:
+        print(f"  → No data found in {new_json_dir}\n")
 
-    # ── Open loop 5.4 Hz — load from OL_RDM per-sample JSONs ─────────────────
-    print("Open Loop 5.4 Hz (no phase lock):")
-    ol_dir = base_path / 'OL_RDM'
-    ol_reductions = []
-    for jf in sorted(ol_dir.glob('OPEN_LOOP_54_sample*.json')):
-        try:
-            with open(jf) as f:
-                d = json.load(f)
-            pct = d.get('reduction', {}).get('magnitude_reduction_pct', None)
-            if pct is not None:
-                ol_reductions.append(pct)
-                print(f"  {jf.name}: {pct:.1f}%")
-        except Exception as e:
-            print(f"  [ERROR] {jf.name}: {e}")
-    if ol_reductions:
-        ol_reductions = np.array(ol_reductions)
-        all_data['ol54'] = {
+    # ── Open loop 5.5 Hz — new session JSONs ─────────────────────────────────
+    print("Open Loop 5.5 Hz (new session):")
+    ol_reductions = load_new_session_jsons(new_json_dir, 'OPEN_LOOP_55')
+    if len(ol_reductions) > 0:
+        all_data['ol55'] = {
             'reductions': ol_reductions,
             'mean': np.mean(ol_reductions),
             'std':  np.std(ol_reductions, ddof=1),
             'sem':  stats.sem(ol_reductions),
             'n':    len(ol_reductions),
-            'label': '5.4 Hz\nOpen Loop\n(no sync)',
+            'label': '5.5 Hz\nOpen Loop\n(no sync)',
         }
         print(f"  → {len(ol_reductions)} trials, mean = {np.mean(ol_reductions):.1f}%\n")
+    else:
+        print(f"  → No data found\n")
 
     # ── Off-frequency conditions ──────────────────────────────────────────────
     for config in test_configs:
@@ -197,19 +215,18 @@ def main():
         else:
             print(f"  → No data found\n")
 
-    # Build ordered condition list — ol54 merges at the 5.4 Hz position
+    # Build ordered condition list — ol55 merges at the 5.4 Hz position
     ordered_keys = []
-    for f in sorted(k for k in all_data.keys() if k != 'ol54'):
+    for f in sorted(k for k in all_data.keys() if k != 'ol55'):
         ordered_keys.append(f)
 
     n_cond = len(ordered_keys)
 
-    # ── Colors ───────────────────────────────────────────────────────────────
     color_map = {
         0.0:    '#888888',
         3.0:    '#e07070',
         5.4:    '#2e8b57',
-        'ol54': '#e07070',   # same coral as other off-frequency conditions
+        'ol55': '#e07070',
         8.0:    '#e07070',
         10.0:   '#e07070',
     }
@@ -218,15 +235,12 @@ def main():
     np.random.seed(42)
 
     x_positions = {k: i for i, k in enumerate(ordered_keys)}
-    # ol54 shares the same x position as 5.4
-    if 'ol54' in all_data:
-        x_positions['ol54'] = x_positions[5.4]
+    if 'ol55' in all_data:
+        x_positions['ol55'] = x_positions[5.4]
 
-    # ── Plot each condition ───────────────────────────────────────────────────
-    # Plot closed loop first, then ol54 on top at same position
     plot_order = ordered_keys.copy()
-    if 'ol54' in all_data:
-        plot_order.append('ol54')
+    if 'ol55' in all_data:
+        plot_order.append('ol55')
 
     for key in plot_order:
         d      = all_data[key]
@@ -241,52 +255,34 @@ def main():
 
         mean, ci_lo, ci_hi = draw_ci_box(ax, x, values, color, box_width=0.42)
 
-        # Significance vs closed loop (5.4)
         sig_label = ''
         if 5.4 in all_data and key != 5.4:
             matched = all_data[5.4]['reductions']
             _, p = stats.ttest_ind(matched, values)
             sig_label = '***' if p < 0.001 else '**' if p < 0.01 else '*' if p < 0.05 else 'ns'
 
-        # Same arrow length for all annotations
-        ANN_XY   = x + 0.22   # arrowhead
-        ANN_TEXT = x + 0.38   # text — shorter offset
+        ANN_XY   = x + 0.22
+        ANN_TEXT = x + 0.38
 
-        if key == 'ol54':
+        if key == 'ol55':
             ax.annotate(f'{mean:.1f}%\n(open loop)',
-                        xy=(ANN_XY, mean),
-                        xytext=(ANN_TEXT, mean),
-                        fontsize=9, fontweight='bold', color=color,
-                        va='center',
+                        xy=(ANN_XY, mean), xytext=(ANN_TEXT, mean),
+                        fontsize=9, fontweight='bold', color=color, va='center',
                         arrowprops=dict(arrowstyle='->', color=color, lw=1.0))
         else:
             pct_label = f'{mean:.1f}%' if key != 5.4 else f'{mean:.1f}%\n(closed loop, 255°)'
             ax.annotate(pct_label,
-                        xy=(ANN_XY, mean),
-                        xytext=(ANN_TEXT, mean),
-                        fontsize=9, fontweight='bold', color=color,
-                        va='center',
+                        xy=(ANN_XY, mean), xytext=(ANN_TEXT, mean),
+                        fontsize=9, fontweight='bold', color=color, va='center',
                         arrowprops=dict(arrowstyle='->', color=color, lw=1.2))
 
         if sig_label:
-            # Stars above the annotation text
             ax.text(ANN_TEXT, mean + 2.5, sig_label,
                     ha='center', va='bottom', fontsize=11,
                     color='#444444', fontweight='bold')
 
     # ── Zero line ─────────────────────────────────────────────────────────────
     ax.axhline(0, color='black', linestyle='-', linewidth=0.8, alpha=0.3)
-
-    # ── Legend ────────────────────────────────────────────────────────────────
-   # legend_elements = [
-    #    mpatches.Patch(color='#2e8b57', label='Frequency-Matched Control'),
-     #   mpatches.Patch(color='#e07070', label='Off-Frequency Control'),
-      #  mpatches.Patch(color='#888888', label='DC (0 Hz) Control'),
-       # plt.Line2D([0], [0], color='gray', linewidth=2,   label='Mean'),
-        #plt.Line2D([0], [0], color='gray', linewidth=1.5,
-         #          linestyle='--', label='95% CI'),
-    #]
-    #ax.legend(handles=legend_elements, loc='upper right', fontsize=10, framealpha=0.9)
 
     # ── Axes formatting ───────────────────────────────────────────────────────
     ax.set_xticks(range(n_cond))
@@ -299,16 +295,8 @@ def main():
     ax.set_xlim(-0.6, n_cond - 0.4)
 
     # Dynamic y limits
-    all_vals = np.concatenate([all_data[k]['reductions'] for k in list(ordered_keys) + (['ol54'] if 'ol54' in all_data else [])])
-    y_min = min(all_vals) - 8
-    y_max = max(all_vals) + 8
-    ax.set_ylim(y_min, y_max)
-
-    # n labels at bottom
-    for k in ordered_keys:
-        x = x_positions[k]
-        ax.text(x, y_min + 1, f'n={all_data[k]["n"]}',
-                ha='center', va='top', fontsize=9, color='#555')
+    all_vals = np.concatenate([all_data[k]['reductions'] for k in list(ordered_keys) + (['ol55'] if 'ol55' in all_data else [])])
+    ax.set_ylim(min(all_vals) - 8, max(all_vals) + 8)
 
     plt.tight_layout()
 
@@ -326,18 +314,18 @@ def main():
         n  = d['n']
         ci = stats.sem(d['reductions']) * stats.t.ppf(0.975, df=n-1)
         print(f"{d['label'].replace(chr(10),' '):25} {d['mean']:6.1f}% ± {ci:.2f}% CI  (n={n})")
-    if 'ol54' in all_data:
-        d = all_data['ol54']
+    if 'ol55' in all_data:
+        d = all_data['ol55']
         n  = d['n']
         ci = stats.sem(d['reductions']) * stats.t.ppf(0.975, df=n-1)
         print(f"{d['label'].replace(chr(10),' '):25} {d['mean']:6.1f}% ± {ci:.2f}% CI  (n={n})")
 
     if 5.4 in all_data:
         print("\n" + "="*65)
-        print("STATISTICAL TESTS vs Frequency-Matched (n=30)")
+        print("STATISTICAL TESTS vs Closed Loop")
         print("="*65)
         matched = all_data[5.4]['reductions']
-        test_keys = [k for k in ordered_keys if k != 5.4] + (['ol54'] if 'ol54' in all_data else [])
+        test_keys = [k for k in ordered_keys if k != 5.4] + (['ol55'] if 'ol55' in all_data else [])
         for key in test_keys:
             test = all_data[key]['reductions']
             _, p = stats.ttest_ind(matched, test)
@@ -346,7 +334,7 @@ def main():
             d_val  = (np.mean(matched) - np.mean(test)) / pooled
             sig    = '***' if p < 0.001 else '**' if p < 0.01 else '*' if p < 0.05 else 'ns'
             lbl    = all_data[key]['label'].replace('\n',' ')
-            print(f"Freq Matched vs {lbl:25}  p={p:.4f} {sig}  Cohen's d={d_val:.2f}")
+            print(f"Closed Loop vs {lbl:25}  p={p:.4f} {sig}  Cohen's d={d_val:.2f}")
 
     print("="*65)
     plt.show()
@@ -354,8 +342,7 @@ def main():
 
 # ── ORIGINAL PLOT (bar + line) ────────────────────────────────────────────────
 def plot_original(all_data):
-    # Build ordered list — ol54 sits at 5.4 Hz in line plot, separate bar in bar chart
-    numeric_freqs = sorted(k for k in all_data.keys() if k != 'ol54')
+    numeric_freqs = sorted(k for k in all_data.keys() if k != 'ol55')
     freqs  = numeric_freqs
     means  = [all_data[f]['mean'] for f in freqs]
     sems   = [all_data[f]['sem']  for f in freqs]
@@ -363,56 +350,21 @@ def plot_original(all_data):
     labels = [all_data[f]['label'] for f in freqs]
     ns     = [all_data[f]['n']    for f in freqs]
 
-    # Include ol54 as separate bar
-    bar_keys   = []
-    for f in freqs:
-        bar_keys.append(f)
-        if f == 5.4 and 'ol54' in all_data:
-            bar_keys.append('ol54')
-
-    bar_means  = [all_data[k]['mean'] for k in bar_keys]
-    bar_stds   = [all_data[k]['std']  for k in bar_keys]
-    bar_labels = [all_data[k]['label'] for k in bar_keys]
-    bar_ns     = [all_data[k]['n']    for k in bar_keys]
-
     colors  = ['gray' if f == 0 else ('darkgreen' if f == 5.4 else 'lightcoral') for f in freqs]
     markers = ['X'    if f == 0 else ('s'         if f == 5.4 else 'o')          for f in freqs]
-    bar_colors = []
-    for k in bar_keys:
-        if k == 0.0:      bar_colors.append('gray')
-        elif k == 5.4:    bar_colors.append('darkgreen')
-        elif k == 'ol54': bar_colors.append('lightcoral')
-        else:             bar_colors.append('lightcoral')
 
-    base_path_orig = Path.home() / 'Desktop' / 'Flutter_analysis' / 'figures_for_dissertation' / 'off_frequency_tests'
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
 
-    # ── Figure 1: Line plot ───────────────────────────────────────────────────
-    fig1, ax1 = plt.subplots(figsize=(8, 6))
+    # Line plot with SEM error bars
     for i, (freq, mean, sem, color, marker) in enumerate(zip(freqs, means, sems, colors, markers)):
         lbl = ('No Control' if freq == 0 else
-               'Matched Frequency' if freq == 5.4 else None)
+               'Matched Frequency' if freq == 5.8 else
+               'Off-Frequency' if i == 1 else None)
         ax1.errorbar(freq, mean, yerr=sem, fmt=marker, color=color,
                      markersize=14, capsize=6, capthick=2.5, linewidth=2.5,
                      label=lbl, elinewidth=2.5, zorder=5)
-    # Open loop point at 5.4 Hz
-    if 'ol54' in all_data:
-        d = all_data['ol54']
-        ax1.errorbar(5.4, d['mean'], yerr=d['sem'], fmt='o', color='lightcoral',
-                     markersize=10, capsize=6, capthick=2.0, linewidth=2.0,
-                     label='Open Loop (no sync)', elinewidth=2.0, zorder=6,
-                     markeredgecolor='#e07070')
     ax1.plot(freqs, means, '--', color='gray', alpha=0.4, linewidth=1.5, zorder=1)
-
-    # Draw dashed line connecting only coral (off-freq) points + open loop at 5.4
-    coral_x = [f for f in freqs if f not in [5.4]]
-    coral_y = [all_data[f]['mean'] for f in coral_x]
-    if 'ol54' in all_data:
-        insert_idx = next((i for i, f in enumerate(coral_x) if f > 5.4), len(coral_x))
-        coral_x.insert(insert_idx, 5.4)
-        coral_y.insert(insert_idx, all_data['ol54']['mean'])
-    # Remove the all-points line and replace with coral-only line
-    ax1.lines[-1].remove()  # remove the all-points dashed line just drawn
-    ax1.plot(coral_x, coral_y, '--', color='gray', alpha=0.4, linewidth=1.5, zorder=1)
+    ax1.axhline(0, color='black', linestyle='-', alpha=0.3, linewidth=1)
     ax1.set_xlabel('Control Frequency (Hz)', fontsize=14, fontweight='bold')
     ax1.set_ylabel('Flutter Magnitude Reduction (%)', fontsize=14, fontweight='bold')
     ax1.set_title('Off-Frequency Control Effectiveness\n(Error bars = SEM)',
@@ -421,33 +373,23 @@ def plot_original(all_data):
     ax1.legend(loc='upper right', fontsize=12, framealpha=0.9)
     ax1.set_ylim(min(means) - max(sems) - 3, max(means) + max(sems) + 3)
 
-    plt.tight_layout()
-    out1 = base_path_orig / 'off_frequency_line_plot.png'
-    fig1.savefig(out1, dpi=300, bbox_inches='tight')
-    fig1.savefig(str(out1).replace('.png', '.pdf'), bbox_inches='tight')
-    print(f"Line plot saved to: {out1}")
-    plt.show()
-
-    # ── Figure 2: Bar chart ───────────────────────────────────────────────────
-    fig2, ax2 = plt.subplots(figsize=(10, 6))
-    x_pos = np.arange(len(bar_keys))
-    bars  = ax2.bar(x_pos, bar_means, yerr=bar_stds, capsize=5,
-                    color=bar_colors, edgecolor='black', linewidth=1.5,
+    # Bar chart with individual points
+    x_pos = np.arange(len(freqs))
+    bars  = ax2.bar(x_pos, means, yerr=stds, capsize=5,
+                    color=colors, edgecolor='black', linewidth=1.5,
                     alpha=0.7, error_kw={'linewidth': 2})
 
-    for i, key in enumerate(bar_keys):
-        values   = all_data[key]['reductions']
+    for i, freq in enumerate(freqs):
+        values   = all_data[freq]['reductions']
         x_jitter = np.random.normal(i, 0.045, size=len(values))
         ax2.scatter(x_jitter, values, alpha=0.8, s=45,
                     color='white', edgecolors='black', linewidth=1.0, zorder=10)
 
-    if 5.4 in all_data:
+    if 5.4 in all_data and len(all_data) > 2:
         matched_data = all_data[5.4]['reductions']
-        for i, (bar, key) in enumerate(zip(bars, bar_keys)):
-            mean = all_data[key]['mean']
-            n    = all_data[key]['n']
-            if key != 5.4:
-                _, p_val = stats.ttest_ind(matched_data, all_data[key]['reductions'])
+        for i, (bar, freq, mean, std, n) in enumerate(zip(bars, freqs, means, stds, ns)):
+            if freq != 5.8:
+                _, p_val = stats.ttest_ind(matched_data, all_data[freq]['reductions'])
                 sig = '***' if p_val < 0.001 else '**' if p_val < 0.01 else '*' if p_val < 0.05 else 'ns'
                 label_text = f'{sig}\n{mean:.1f}%\n(n={n})'
             else:
@@ -456,20 +398,20 @@ def plot_original(all_data):
                      label_text, ha='center', va='bottom', fontsize=10, fontweight='bold')
 
     ax2.set_xticks(x_pos)
-    ax2.set_xticklabels(bar_labels, fontsize=11)
+    ax2.set_xticklabels(labels, fontsize=11)
     ax2.set_ylabel('Flutter Magnitude Reduction (%)', fontsize=14, fontweight='bold')
     ax2.set_title('Individual Trial Results\n(Error bars = Std Dev, dots = individual trials)',
                   fontsize=15, fontweight='bold')
     ax2.grid(True, alpha=0.3, axis='y')
     ax2.axhline(0, color='black', linestyle='-', alpha=0.3, linewidth=1)
-    all_bar_vals = np.concatenate([all_data[k]['reductions'] for k in bar_keys])
-    ax2.set_ylim(min(-5, min(all_bar_vals) - 10), max(all_bar_vals) + max(bar_stds) + 10)
+    ax2.set_ylim(min(-5, min(means) - max(stds) - 10),
+                 max(means) + max(stds) + 10)
 
     plt.tight_layout()
-    out2 = base_path_orig / 'off_frequency_bar_chart.png'
-    fig2.savefig(out2, dpi=300, bbox_inches='tight')
-    fig2.savefig(str(out2).replace('.png', '.pdf'), bbox_inches='tight')
-    print(f"Bar chart saved to: {out2}")
+    base_path = Path.home() / 'Desktop' / 'Flutter_analysis' / 'figures_for_dissertation' / 'off_frequency_tests'
+    output_path = base_path.parent / 'off_frequency_tests' / 'off_frequency_validation_original.png'
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    print(f"Original figure saved to: {output_path}")
     plt.show()
 
 
@@ -477,7 +419,9 @@ def plot_original(all_data):
 if __name__ == '__main__':
     main()
     # Re-load data and call original plot
-    base_path = Path.home() / 'Desktop' / 'Flutter_analysis' / 'figures_for_dissertation' / 'off_frequency_tests'
+    base_path    = Path.home() / 'Desktop' / 'Flutter_analysis' / 'figures_for_dissertation' / 'off_frequency_tests'
+    new_json_dir = base_path / 'OL_RDM'
+
     test_configs2 = [
         {'folder': '0hz',  'freq': 0.0,  'label': '0 Hz\n(DC)'},
         {'folder': '3hz',  'freq': 3.0,  'label': '3 Hz'},
@@ -485,7 +429,9 @@ if __name__ == '__main__':
         {'folder': '10hz', 'freq': 10.0, 'label': '10 Hz'},
     ]
     all_data2 = {}
-    cl2 = load_closed_loop_n30(base_path)
+
+    # Closed loop — new session
+    cl2 = load_new_session_jsons(new_json_dir, 'CLOSED_LOOP')
     if len(cl2) > 0:
         all_data2[5.4] = {
             'reductions': cl2,
@@ -493,8 +439,10 @@ if __name__ == '__main__':
             'std':  np.std(cl2, ddof=1),
             'sem':  stats.sem(cl2),
             'n':    len(cl2),
-            'label': '5.3–5.6 Hz\nFrequency Sync\n255° Phase Delay (n=30)',
+            'label': '5.4 Hz\nFrequency Sync\n255° Phase Delay',
         }
+
+    # Off-frequency
     for config in test_configs2:
         results    = load_json_files(base_path, config['folder'], config['freq'])
         reductions = extract_magnitude_reduction(results)
@@ -508,27 +456,16 @@ if __name__ == '__main__':
                 'label': config['label'],
             }
 
-    # Add open loop 5.4 Hz
-    ol_dir2 = base_path / 'OL_RDM'
-    ol_reductions2 = []
-    for jf in sorted(ol_dir2.glob('OPEN_LOOP_54_sample*.json')):
-        try:
-            with open(jf) as f:
-                d = json.load(f)
-            pct = d.get('reduction', {}).get('magnitude_reduction_pct', None)
-            if pct is not None:
-                ol_reductions2.append(pct)
-        except Exception:
-            continue
-    if ol_reductions2:
-        ol_reductions2 = np.array(ol_reductions2)
-        all_data2['ol54'] = {
-            'reductions': ol_reductions2,
-            'mean': np.mean(ol_reductions2),
-            'std':  np.std(ol_reductions2, ddof=1),
-            'sem':  stats.sem(ol_reductions2),
-            'n':    len(ol_reductions2),
-            'label': '5.4 Hz\nOpen Loop\n(no sync)',
+    # Open loop 5.5 Hz — new session
+    ol2 = load_new_session_jsons(new_json_dir, 'OPEN_LOOP_55')
+    if len(ol2) > 0:
+        all_data2['ol55'] = {
+            'reductions': ol2,
+            'mean': np.mean(ol2),
+            'std':  np.std(ol2, ddof=1),
+            'sem':  stats.sem(ol2),
+            'n':    len(ol2),
+            'label': '5.5 Hz\nOpen Loop\n(no sync)',
         }
 
     plot_original(all_data2)
