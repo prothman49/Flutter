@@ -2,3 +2,14 @@
 .DS_Store
 *.png
 *.pdf
+0hz/
+10hz/
+3hz/
+8hz/
+OL_RDM/
+jitter_freq_sweep/
+phase_90/
+*.bag
+*.pyc
+__pycache__/
+.DS_Store

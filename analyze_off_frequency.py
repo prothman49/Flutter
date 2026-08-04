@@ -300,7 +300,10 @@ def main():
 
     plt.tight_layout()
 
-    output_path = base_path.parent / 'off_frequency_tests' / 'off_frequency_validation_new.png'
+    from datetime import datetime
+    dated_dir   = base_path / (datetime.now().strftime('%Y%m%d_%H%M%S') + '_off_frequency')
+    dated_dir.mkdir(parents=True, exist_ok=True)
+    output_path = dated_dir / 'off_frequency_validation_new.png'
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.savefig(str(output_path).replace('.png', '.pdf'), bbox_inches='tight')
     print(f"\nFigure saved to: {output_path}")
